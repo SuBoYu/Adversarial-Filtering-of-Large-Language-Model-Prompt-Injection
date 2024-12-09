@@ -1,9 +1,10 @@
+import google.generativeai as genai
 import pandas as pd
 from dotenv import load_dotenv
 import os
-import google.generativeai as genai
+from tqdm import tqdm
 
-# Set the API keys for OpenAI and Google Gemini
+# Set the API keys
 load_dotenv(".env")
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 
@@ -16,7 +17,7 @@ def load_harmfulqa_dataset(file_path):
     return pd.read_csv(file_path)
 
 
-# Function to query GPT (OpenAI API)
+# Function to query LLM
 def query_gpt(prompt):
     try:
         response = client.generate_content(prompt, generation_config=genai.GenerationConfig(
@@ -31,7 +32,7 @@ def query_gpt(prompt):
 def evaluate_prompt_injection(dataset):
     results = []
     # iterate over the dataset
-    for index, row in dataset.iterrows():
+    for index, row in tqdm(dataset.iterrows(), total=dataset.shape[0], desc="Evaluating prompt injections"):
         id = row['id']
         question = row['question']  # Assuming the dataset has a column named 'prompt'
 
@@ -77,8 +78,8 @@ def main():
     results_df = evaluate_prompt_injection(harmfulqa_dataset)
 
     # Save results to a CSV file
-    results_df.to_csv("gemini_prompt_injection_results.csv", index=False)
-    print("Evaluation completed. Results saved to 'gemini_prompt_injection_results.csv'")
+    results_df.to_csv("prompt_injection_results_gemini_1.5_flash.csv", index=False)
+    print("Evaluation completed. Results saved to prompt_injection_results_gemini_1.5_flash.csv'")
 
 
 if __name__ == "__main__":
